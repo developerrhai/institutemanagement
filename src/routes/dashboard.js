@@ -1,0 +1,11 @@
+const express = require("express");
+const router = express.Router();
+const auth = require("../middleware/auth");
+const c = require("../controllers/dashboardController");
+router.get("/stats",                auth, c.stats);
+router.get("/payment-status",       auth, c.paymentStatus);
+router.get("/students-by-standard", auth, c.studentsByStandard);
+router.get("/students-by-location", auth, c.studentsByLocation);
+router.get("/fee-collection",       auth, c.feeCollection);
+router.get("/finance-overview",     auth, c.financeOverview);
+module.exports = router;
