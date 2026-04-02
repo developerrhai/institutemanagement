@@ -77,7 +77,7 @@ router.post("/", async (req, res) => {
     //   );
     //
     // Then uncomment the block below:
-    /*
+  
     if (Object.keys(extra).length > 0) {
       await db.query(
         `INSERT INTO inquiry_extra
@@ -104,7 +104,7 @@ router.post("/", async (req, res) => {
         ]
       )
     }
-    */
+    
 
     return res.status(201).json({
       success: true,
