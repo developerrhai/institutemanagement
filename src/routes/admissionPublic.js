@@ -12,10 +12,15 @@ const db      = require("../config/db")
 
 router.post("/", async (req, res) => {
   try {
-    const { name, phone, father_name, father_phone, board, standard, location } = req.body
+    const { name, phone, email, father_name, father_phone, board, standard, course, location } = req.body
 
     if (!name || !phone) {
       return res.status(400).json({ success: false, message: "Name and phone are required" })
+    }
+
+    // Basic email format validation
+    if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+      return res.status(400).json({ success: false, message: "Invalid email format" })
     }
 
     // Attach to the first admin (single-institute setup)
@@ -27,16 +32,18 @@ router.post("/", async (req, res) => {
 
     const [result] = await db.query(
       `INSERT INTO students
-         (admin_id, name, phone, father_name, father_phone, board, standard, location, fee, paid_fee)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)`,
+         (admin_id, name, phone, email, father_name, father_phone, board, standard, course, location, fee, paid_fee)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)`,
       [
         adminId,
         name,
         phone,
+        email        || "",
         father_name  || "",
         father_phone || "",
         board        || "",
         standard     || "",
+        course       || "",   // only filled for 11th & 12th
         location     || "",
       ]
     )
