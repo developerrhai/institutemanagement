@@ -10,7 +10,7 @@ const express = require("express")
 const router  = express.Router()
 const db      = require("../config/db")
 
-/* POST /api/teacher-updates/public */
+/* ─────────────── POST: Submit Teacher Update ─────────────── */
 router.post("/", async (req, res) => {
   try {
     const {
@@ -30,6 +30,7 @@ router.post("/", async (req, res) => {
 
     const adminId = admins[0].id
 
+    // Insert into teacher_updates
     const [result] = await db.query(
       `INSERT INTO teacher_updates
          (admin_id, teacher_name, batch, subject, chapter, topic, branch, class_date, class_time, remarks)
@@ -37,10 +38,9 @@ router.post("/", async (req, res) => {
       [adminId, teacher_name, batch, subject, chapter, topic, branch, class_date, class_time, remarks || null]
     )
 
-    // ── Auto-create student_updates for all students in this batch ──────────
-    // This links the teacher update to every student in the batch automatically.
+    // Optional: Auto-create student_updates for all students in this batch
     const [students] = await db.query(
-      "SELECT id, name FROM students WHERE admin_id = ? AND location = ?",
+      "SELECT id, name FROM students WHERE admin_id = ? AND branch = ?",
       [adminId, branch]
     )
 
@@ -72,7 +72,32 @@ router.post("/", async (req, res) => {
   }
 })
 
-/* GET /api/teacher-updates/public?teacher=&branch=&date= — for verification */
+/* ─────────────── GET: Public Fetch All Updates ───────────────
+ * Anyone can fetch all updates without login
+ * Optional filters: teacher, branch, date
+ */
+router.get("/", async (req, res) => {
+  try {
+    const { teacher, branch, date } = req.query
+    let sql = "SELECT id, teacher_name, batch, subject, chapter, topic, branch, class_date, class_time, remarks FROM teacher_updates WHERE 1=1"
+    const params = []
+
+    if (teacher) { sql += " AND teacher_name = ?"; params.push(teacher) }
+    if (branch)  { sql += " AND branch = ?";       params.push(branch) }
+    if (date)    { sql += " AND class_date = ?";   params.push(date) }
+
+    sql += " ORDER BY class_date DESC, class_time DESC"
+    const [rows] = await db.query(sql, params)
+    res.json({ success: true, updates: rows })
+  } catch (err) {
+    console.error("Public fetch error:", err)
+    res.status(500).json({ success: false, message: "Server error" })
+  }
+})
+
+/* ─────────────── GET: Verify Teacher Update ───────────────
+ * Optional, for quick verification
+ */
 router.get("/verify", async (req, res) => {
   try {
     const { teacher, branch, date } = req.query
