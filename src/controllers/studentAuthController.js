@@ -60,7 +60,7 @@ const loginStudent = async (req, res) => {
         email: student.email,
         role: 'STUDENT',
         token: generateToken(student.id, 'STUDENT'),
-        is_first_login: true // Force password change since it was default password
+        is_first_login: !!student.is_first_login
       });
     } else {
       res.status(401).json({ message: 'Invalid credentials' });

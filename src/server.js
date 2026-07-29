@@ -63,6 +63,8 @@ app.use("/api/dashboard/student", require("./routes/studentDashboardRoutes"));
 app.use("/api/recycle-bin", require("./routes/recycleBinRoutes"));
 app.use("/api/homework", require("./routes/homework"));
 app.use("/api/teaching-logs", require("./routes/teachingLogs"));
+app.use("/api/chat-groups", require("./routes/chatGroups"));
+app.use("/api/chat-messages", require("./routes/chatMessages"));
 
 /* ── Health check ───────────────────────────────────────── */
 app.get("/api/health", (_req, res) => {
@@ -109,7 +111,14 @@ const PORT = process.env.PORT || 5001;
     const { ensureOtpColumns } = require("./db/migrate");
     await ensureOtpColumns(db);
 
-    app.listen(PORT, () => {
+    const http = require("http");
+    const server = http.createServer(app);
+
+    // Initialize Socket.io
+    const socketConfig = require("./config/socket");
+    socketConfig.init(server);
+
+    server.listen(PORT, () => {
       console.log(`\n🚀 Backend running → http://localhost:${PORT}`);
       console.log(`ENV : ${process.env.NODE_ENV || "development"}`);
       console.log(`DB  : ${process.env.DB_NAME}@${process.env.DB_HOST}\n`);

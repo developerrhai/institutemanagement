@@ -4,6 +4,8 @@ const cors    = require("cors");
 const morgan  = require("morgan");
 const db      = require("./config/db");
 
+const { initFirebase } = require("./config/firebase");
+
 const app = express();
 
 /* ── Middleware ─────────────────────────────────────────── */
@@ -34,6 +36,9 @@ app.use("/api/dashboard/student", require("./routes/studentDashboardRoutes"));
 app.use("/api/recycle-bin", require("./routes/recycleBinRoutes"));
 app.use("/api/homework", require("./routes/homework"));
 app.use("/api/teaching-logs", require("./routes/teachingLogs"));
+app.use("/api/chat-groups", require("./routes/chatGroups"));
+app.use("/api/chat-messages", require("./routes/chatMessages"));
+app.use("/api/notifications", require("./routes/notifications"));
 
 /* ── Health check ───────────────────────────────────────── */
 app.get("/api/health", (_req, res) =>
@@ -59,6 +64,10 @@ const PORT = process.env.PORT || 5001;
   try {
     await db.testConnection();
     console.log("✅ MySQL connected");
+
+    // Initialize Firebase Admin SDK
+    initFirebase();
+
     app.listen(PORT, () => {
       console.log(`\n🚀 InstituteMS backend  →  http://localhost:${PORT}`);
       console.log(`   ENV : ${process.env.NODE_ENV || "development"}`);

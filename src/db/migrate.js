@@ -137,6 +137,114 @@ CREATE TABLE IF NOT EXISTS invoices (
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+-- ─────────────────────────────────────────────────────────
+-- 8. boards
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS boards (
+  board_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ─────────────────────────────────────────────────────────
+-- 9. standards
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS standards (
+  stand_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  board_id INT UNSIGNED NOT NULL,
+  batch_id INT UNSIGNED NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  FOREIGN KEY (board_id) REFERENCES boards(board_id) ON DELETE CASCADE,
+  FOREIGN KEY (batch_id) REFERENCES batches(batch_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ─────────────────────────────────────────────────────────
+-- 10. subjects
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS subjects (
+  sub_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  stand_id INT UNSIGNED NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  teacher_id INT UNSIGNED DEFAULT NULL,
+  FOREIGN KEY (stand_id) REFERENCES standards(stand_id) ON DELETE CASCADE,
+  FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ─────────────────────────────────────────────────────────
+-- 11. chapters
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS chapters (
+  chap_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  sub_id INT UNSIGNED NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  FOREIGN KEY (sub_id) REFERENCES subjects(sub_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ─────────────────────────────────────────────────────────
+-- 12. topics
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS topics (
+  topic_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  chap_id INT UNSIGNED NOT NULL,
+  topic_name VARCHAR(200) NOT NULL,
+  start_date DATE DEFAULT NULL,
+  end_date DATE DEFAULT NULL,
+  FOREIGN KEY (chap_id) REFERENCES chapters(chap_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ─────────────────────────────────────────────────────────
+-- 13. notes
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS notes (
+  note_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  chap_id INT UNSIGNED NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  file_url VARCHAR(500) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (chap_id) REFERENCES chapters(chap_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ─────────────────────────────────────────────────────────
+-- 14. inquiry_extra
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS inquiry_extra (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  father_name VARCHAR(100) DEFAULT '',
+  father_phone VARCHAR(20) DEFAULT '',
+  course VARCHAR(100) DEFAULT '',
+  location VARCHAR(100) DEFAULT '',
+  board VARCHAR(20) DEFAULT '',
+  standard VARCHAR(10) DEFAULT '',
+  status VARCHAR(50) NOT NULL DEFAULT 'New',
+  video VARCHAR(500) DEFAULT '',
+  dob DATE DEFAULT NULL,
+  email VARCHAR(150) DEFAULT NULL,
+  address TEXT DEFAULT NULL,
+  college_name VARCHAR(200) DEFAULT '',
+  college_timing VARCHAR(100) DEFAULT '',
+  last_exam_marks VARCHAR(50) DEFAULT '',
+  father_occupation VARCHAR(100) DEFAULT '',
+  mother_occupation VARCHAR(100) DEFAULT '',
+  future_plans VARCHAR(200) DEFAULT '',
+  reference VARCHAR(100) DEFAULT '',
+  sibling_name VARCHAR(100) DEFAULT '',
+  sex VARCHAR(20) DEFAULT '',
+  taking_coaching VARCHAR(20) DEFAULT '',
+  hostel_required VARCHAR(20) DEFAULT '',
+  admin_id INT UNSIGNED DEFAULT NULL,
+  inquiry_date DATE DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- ─────────────────────────────────────────────────────────
 -- 7. finance_records  (payroll + expenses)
 -- ─────────────────────────────────────────────────────────
@@ -356,6 +464,113 @@ async function ensureOtpColumns(conn) {
     console.log("✅ attendance table verified/created.");
   } catch (err) {
     console.warn("⚠️ Could not create attendance table:", err.message);
+  }
+
+  // ── Chat System Tables ────────────────────────────────
+  // chat_groups
+  try {
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS chat_groups (
+        id            INT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
+        name          VARCHAR(150)  NOT NULL,
+        description   TEXT          DEFAULT NULL,
+        created_by    INT UNSIGNED  NOT NULL       COMMENT 'admin id who created the group',
+        is_deleted    TINYINT(1)    NOT NULL DEFAULT 0,
+        created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_created_by (created_by),
+        INDEX idx_is_deleted (is_deleted)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("✅ chat_groups table verified/created.");
+  } catch (err) {
+    console.warn("⚠️ Could not create chat_groups table:", err.message);
+  }
+
+  // chat_group_members
+  try {
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS chat_group_members (
+        id            INT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
+        group_id      INT UNSIGNED  NOT NULL       COMMENT 'FK → chat_groups.id',
+        user_id       INT UNSIGNED  NOT NULL       COMMENT 'user id from admins/teachers/students',
+        user_role     ENUM('ADMIN','TEACHER','STUDENT') NOT NULL,
+        joined_at     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        removed_at    TIMESTAMP     NULL     DEFAULT NULL,
+        UNIQUE KEY uq_group_user (group_id, user_id, user_role),
+        INDEX idx_user_id (user_id),
+        INDEX idx_group_active (group_id, removed_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("✅ chat_group_members table verified/created.");
+  } catch (err) {
+    console.warn("⚠️ Could not create chat_group_members table:", err.message);
+  }
+
+  // chat_messages
+  try {
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS chat_messages (
+        id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        group_id      INT UNSIGNED    NOT NULL       COMMENT 'FK → chat_groups.id',
+        sender_id     INT UNSIGNED    NOT NULL,
+        sender_role   ENUM('ADMIN','TEACHER','STUDENT') NOT NULL,
+        sender_name   VARCHAR(150)    NOT NULL       COMMENT 'Denormalized for fast reads',
+        message_text  TEXT            NOT NULL,
+        is_deleted    TINYINT(1)      NOT NULL DEFAULT 0,
+        created_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_group_time (group_id, created_at DESC),
+        INDEX idx_sender (sender_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("✅ chat_messages table verified/created.");
+  } catch (err) {
+    console.warn("⚠️ Could not create chat_messages table:", err.message);
+  }
+
+  // fcm_tokens table
+  try {
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS fcm_tokens (
+        id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        public_id   VARCHAR(50)   NOT NULL UNIQUE,
+        user_id     INT UNSIGNED   NOT NULL,
+        user_role   ENUM('ADMIN','STUDENT','TEACHER') NOT NULL DEFAULT 'STUDENT',
+        token       VARCHAR(500)  NOT NULL UNIQUE,
+        device_type VARCHAR(50)   DEFAULT 'web',
+        last_active TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        created_at  TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_fcm_tokens_user (user_id, user_role)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("✅ fcm_tokens table verified/created.");
+  } catch (err) {
+    console.warn("⚠️ Could not create fcm_tokens table:", err.message);
+  }
+
+  // notifications table
+  try {
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        public_id       VARCHAR(50)   NOT NULL UNIQUE,
+        title           VARCHAR(255)  NOT NULL,
+        body            TEXT          NOT NULL,
+        target_type     ENUM('single', 'bulk', 'filtered') NOT NULL,
+        target_role     ENUM('ALL', 'STUDENT', 'TEACHER', 'ADMIN') NOT NULL DEFAULT 'STUDENT',
+        target_criteria JSON          DEFAULT NULL,
+        sent_by         INT UNSIGNED  DEFAULT NULL,
+        sent_by_role    VARCHAR(20)   DEFAULT 'ADMIN',
+        success_count   INT           DEFAULT 0,
+        failure_count   INT           DEFAULT 0,
+        status          ENUM('pending', 'sent', 'failed') DEFAULT 'pending',
+        created_at      TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_notifications_public (public_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("✅ notifications table verified/created.");
+  } catch (err) {
+    console.warn("⚠️ Could not create notifications table:", err.message);
   }
 }
 
