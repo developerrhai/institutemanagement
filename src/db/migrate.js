@@ -259,6 +259,71 @@ CREATE TABLE IF NOT EXISTS finance_records (
   created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ─────────────────────────────────────────────────────────
+-- 15. teacher_batches
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS teacher_batches (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  teacher_id INT UNSIGNED NOT NULL,
+  batch VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_teacher_batch (teacher_id, batch),
+  FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────────────────────
+-- 16. homework
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS homework (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  subject VARCHAR(100) NOT NULL,
+  batch VARCHAR(100) NOT NULL,
+  teacher_id INT UNSIGNED NOT NULL,
+  due_date DATE NOT NULL,
+  attachment_url VARCHAR(500) DEFAULT NULL,
+  branch VARCHAR(100) DEFAULT NULL,
+  board VARCHAR(100) DEFAULT NULL,
+  standard VARCHAR(100) DEFAULT NULL,
+  chapter VARCHAR(100) DEFAULT NULL,
+  topic VARCHAR(200) DEFAULT NULL,
+  is_deleted TINYINT(1) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────────────────────
+-- 17. homework_status
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS homework_status (
+  homework_id INT UNSIGNED NOT NULL,
+  student_id INT UNSIGNED NOT NULL,
+  status VARCHAR(50) NOT NULL DEFAULT 'Pending',
+  feedback TEXT DEFAULT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (homework_id, student_id),
+  FOREIGN KEY (homework_id) REFERENCES homework(id) ON DELETE CASCADE,
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────────────────────
+-- 18. teaching_logs
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS teaching_logs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  class_date DATE NOT NULL,
+  subject VARCHAR(100) NOT NULL,
+  topic VARCHAR(200) NOT NULL,
+  notes TEXT DEFAULT NULL,
+  batch VARCHAR(100) NOT NULL,
+  teacher_id INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_teacher_batch_date (teacher_id, batch, class_date),
+  FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 `;
 
 async function ensureOtpColumns(conn) {
