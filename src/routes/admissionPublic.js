@@ -57,8 +57,8 @@ router.post("/", async (req, res) => {
 
     const [result] = await db.query(
       `INSERT INTO students
-         (admin_id, name, phone, email, father_name, father_phone, board, standard, course, location, subjects, fee, paid_fee, password, encrypted_password, is_first_login)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, TRUE)`,
+         (admin_id, name, phone, email, father_name, father_phone, board, standard, course, location, fee, paid_fee, password, encrypted_password, is_first_login)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, TRUE)`,
       [
         adminId,
         name,
@@ -70,7 +70,6 @@ router.post("/", async (req, res) => {
         standard     || "",
         course       || "",   
         location     || "",
-	      subjectsStr,
         hashedPassword,
         encryptedPassword
       ]

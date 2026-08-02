@@ -11,7 +11,7 @@ const app = express();
 
 /* ── Middleware ─────────────────────────────────────────── */
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "https://merit-home.vercel.app",
+  origin: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,

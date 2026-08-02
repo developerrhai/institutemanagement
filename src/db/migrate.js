@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS admins (
   name              VARCHAR(100)  NOT NULL,
   email             VARCHAR(150)  NOT NULL UNIQUE,
   password          VARCHAR(255)  NOT NULL,
+  role              VARCHAR(50)   NOT NULL DEFAULT 'admin',
   institute         VARCHAR(200)  NOT NULL DEFAULT '',
   address           TEXT,
   reset_otp         VARCHAR(6)    DEFAULT NULL,
@@ -67,6 +68,8 @@ CREATE TABLE IF NOT EXISTS teachers (
   admin_id   INT UNSIGNED NOT NULL,
   name       VARCHAR(100) NOT NULL,
   email      VARCHAR(150) DEFAULT NULL,
+  password   VARCHAR(255) DEFAULT NULL,
+  role       VARCHAR(50)  DEFAULT 'teacher',
   phone      VARCHAR(20)  DEFAULT '',
   institute  VARCHAR(200) DEFAULT '',
   location   VARCHAR(100) DEFAULT '',
@@ -137,6 +140,31 @@ CREATE TABLE IF NOT EXISTS invoices (
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+-- ─────────────────────────────────────────────────────────
+-- 7b. branches & batches
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS branches (
+  branch_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  branch_name VARCHAR(100) NOT NULL UNIQUE,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS batches (
+  batch_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  branch_id INT UNSIGNED NOT NULL,
+  batch_name VARCHAR(100) NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  batch_start_date DATE NOT NULL,
+  batch_end_date DATE NOT NULL,
+  late_grace_minutes INT DEFAULT 10,
+  scheduled_days VARCHAR(100) DEFAULT 'Mon,Tue,Wed,Thu,Fri',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (branch_id) REFERENCES branches(branch_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ─────────────────────────────────────────────────────────
 -- 8. boards
@@ -212,9 +240,9 @@ CREATE TABLE IF NOT EXISTS notes (
 
 
 -- ─────────────────────────────────────────────────────────
--- 14. inquiry_extra
+-- 14. inquiry_student
 -- ─────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS inquiry_extra (
+CREATE TABLE IF NOT EXISTS inquiry_student (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   phone VARCHAR(20) NOT NULL,
@@ -368,6 +396,7 @@ async function ensureOtpColumns(conn) {
   try {
     await conn.query(`
       ALTER TABLE admins 
+      ADD COLUMN role VARCHAR(50) DEFAULT 'admin',
       ADD COLUMN reset_otp VARCHAR(6) DEFAULT NULL,
       ADD COLUMN reset_otp_expires DATETIME DEFAULT NULL,
       ADD COLUMN last_otp_sent DATETIME DEFAULT NULL
@@ -384,6 +413,8 @@ async function ensureOtpColumns(conn) {
   try {
     await conn.query(`
       ALTER TABLE teachers 
+      ADD COLUMN password VARCHAR(255) DEFAULT NULL,
+      ADD COLUMN role VARCHAR(50) DEFAULT 'teacher',
       ADD COLUMN reset_otp VARCHAR(6) DEFAULT NULL,
       ADD COLUMN reset_otp_expires DATETIME DEFAULT NULL,
       ADD COLUMN last_otp_sent DATETIME DEFAULT NULL
