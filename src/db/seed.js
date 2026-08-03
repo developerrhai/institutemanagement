@@ -25,7 +25,7 @@ async function seed() {
     "finance_records","invoices","appointments",
     "inquiries","teachers","students","admins",
     "branches","batches","boards","standards",
-    "subjects","chapters","topics","notes","inquiry_student"
+    "subjects","chapters","topics","notes","inquiry_extra"
   ]) {
     await db.query(`TRUNCATE TABLE \`${table}\``);
   }
@@ -39,10 +39,10 @@ async function seed() {
      VALUES (?, ?, ?, ?, ?, ?)`,
     [
       "Admin User",
-      "admin@ariseacademy.com",
+      "admin@meritome.com",
       hash,
       "admin",
-      "Arise Academy Private Limited",
+      "Merit Home Private Limited",
       "123 Education Street, Pune, Maharashtra 411001",
     ]
   );
@@ -51,9 +51,9 @@ async function seed() {
 
   /* ── 2. Teachers ─────────────────────────────────────── */
   const teachers = [
-    { name: "Dr. Anil Mehta",   email: "anil@ariseacademy.com",   phone: "9876543220", location: "Akurdi", subjects: ["Mathematics","Physics"] },
-    { name: "Mrs. Sunita Rao",  email: "sunita@ariseacademy.com",  phone: "9876543221", location: "Balaji Nagar",     subjects: ["Chemistry","Biology"] },
-    { name: "Mr. Rajesh Kumar", email: "rajesh@ariseacademy.com",  phone: "9876543222", location: "Ravet",  subjects: ["English","History"] },
+    { name: "Dr. Anil Mehta",   email: "anil@meritome.com",   phone: "9876543220", location: "Chinchwad", subjects: ["Mathematics","Physics"] },
+    { name: "Mrs. Sunita Rao",  email: "sunita@meritome.com",  phone: "9876543221", location: "Wakad",     subjects: ["Chemistry","Biology"] },
+    { name: "Mr. Rajesh Kumar", email: "rajesh@meritome.com",  phone: "9876543222", location: "Thergaon",  subjects: ["English","History"] },
   ];
   const teacherHash = await bcrypt.hash("teacher123", 10);
   const teacherIds = [];
@@ -61,16 +61,16 @@ async function seed() {
     const [r] = await db.query(
       `INSERT INTO teachers (admin_id, name, email, password, role, phone, institute, location, subjects)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [adminId, t.name, t.email, teacherHash, "teacher", t.phone, "Arise Academy Pvt Ltd", t.location, JSON.stringify(t.subjects)]
+      [adminId, t.name, t.email, teacherHash, "teacher", t.phone, "Merit Home Pvt Ltd", t.location, JSON.stringify(t.subjects)]
     );
     teacherIds.push(r.insertId);
   }
   console.log(`👩‍🏫 ${teachers.length} teachers created`);
 
   /* ── 3. Branches ─────────────────────────────────────── */
-  const [brResult1] = await db.query("INSERT INTO branches (branch_name) VALUES ('Akurdi')");
-  const [brResult2] = await db.query("INSERT INTO branches (branch_name) VALUES ('Balaji Nagar')");
-  const [brResult3] = await db.query("INSERT INTO branches (branch_name) VALUES ('Ravet')");
+  const [brResult1] = await db.query("INSERT INTO branches (branch_name) VALUES ('Chinchwad')");
+  const [brResult2] = await db.query("INSERT INTO branches (branch_name) VALUES ('Wakad')");
+  const [brResult3] = await db.query("INSERT INTO branches (branch_name) VALUES ('Thergaon')");
   const branchId1 = brResult1.insertId;
   const branchId2 = brResult2.insertId;
   const branchId3 = brResult3.insertId;
@@ -143,7 +143,7 @@ async function seed() {
 
   /* ── 10. Inquiry Extra ───────────────────────────────── */
   await db.query(
-    `INSERT INTO inquiry_student (name, phone, father_name, father_phone, dob, sex, email, address, standard, course, board, location, last_exam_marks, college_name, college_timing, future_plans, father_occupation, mother_occupation, sibling_name, reference, taking_coaching, hostel_required, inquiry_date)
+    `INSERT INTO inquiry_extra (name, phone, father_name, father_phone, dob, sex, email, address, standard, course, board, location, last_exam_marks, college_name, college_timing, future_plans, father_occupation, mother_occupation, sibling_name, reference, taking_coaching, hostel_required, inquiry_date)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       "Arjun Singh", "9876540001", "Vikram Singh", "9876540002", "2010-05-15", "Male", "arjun@example.com", "Chinchwad, Pune", "10", "Science Tuition", "CBSE", "Chinchwad", "85%", "Vidya Niketan", "Morning", "Engineering", "Business", "Homemaker", "None", "Friend", "No", "No", new Date()
@@ -165,7 +165,7 @@ async function seed() {
       `INSERT INTO students
          (admin_id,name,email,password,phone,father_name,father_phone,board,standard,course,location,institute,fee,paid_fee,is_first_login)
        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,0)`,
-      [adminId,s.name,s.email,studentHash,s.phone,s.father_name,s.father_phone,s.board,s.standard,s.course,s.location,"Arise Academy Pvt Ltd",s.fee,s.paid_fee]
+      [adminId,s.name,s.email,studentHash,s.phone,s.father_name,s.father_phone,s.board,s.standard,s.course,s.location,"Merit Home Pvt Ltd",s.fee,s.paid_fee]
     );
     studentIds.push(r.insertId);
   }
@@ -249,7 +249,7 @@ async function seed() {
   console.log("\n✅ Seed complete!");
   console.log("────────────────────────────────────");
   console.log("🔐 Admin credentials");
-  console.log("   Email    : admin@ariseacademy.com");
+  console.log("   Email    : admin@meritome.com");
   console.log("   Password : admin123");
   console.log("────────────────────────────────────");
   console.log("🔐 Student credentials");

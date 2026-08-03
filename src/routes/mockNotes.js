@@ -9,7 +9,7 @@ const dbPath = path.join(__dirname, "../db/mock_notes_db.json");
 // Default initial seeded data
 const initialData = {
   branches: [
-    { branch_id: 1, branch_name: "Akurdi" },
+    { branch_id: 1, branch_name: "Chinchwad" },
     { branch_id: 2, branch_name: "Wakad" },
     { branch_id: 3, branch_name: "Thergaon" }
   ],

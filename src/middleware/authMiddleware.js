@@ -27,7 +27,7 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ message: 'Not authorized, user disabled or not found' });
       }
 
-      req.user = { ...rows[0], role };
+      req.user = { ...rows[0], role: upperRole };
       
       next();
     } catch (error) {

@@ -44,7 +44,6 @@
 		[adminId, branch]
 		)
 
-		/*
 		if (students.length > 0) {
 		const rows = students.map(s => [
 		adminId, s.id, s.name, batch, subject, chapter,
@@ -59,7 +58,6 @@
 		[rows]
 		)
 		}
-		*/
 
 		return res.status(201).json({
 		success: true,

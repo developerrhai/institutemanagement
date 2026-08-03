@@ -91,16 +91,16 @@ async function seed() {
     console.log("👤 Seeding Super Admin...");
     const [adminResult] = await conn.query(
       `INSERT INTO admins (name, email, password, role, institute) VALUES (?, ?, ?, ?, ?)`,
-      ['Super Admin', 'admin@ariseacademy.com', defaultPassword, 'admin', 'Arise Academy']
+      ['Super Admin', 'admin@merithome.com', defaultPassword, 'admin', 'Merit Home Institute']
     );
     const adminId = adminResult.insertId;
 
     // 5. Seed Teachers
     console.log("👨‍🏫 Seeding Teachers...");
     const teachersData = [
-      ['Math Teacher', 'math@ariseacademy.com', '["Math"]'],
-      ['Science Teacher', 'science@ariseacademy.com', '["Physics", "Chemistry"]'],
-      ['English Teacher', 'english@ariseacademy.com', '["English"]']
+      ['Math Teacher', 'math@merithome.com', '["Math"]'],
+      ['Science Teacher', 'science@merithome.com', '["Physics", "Chemistry"]'],
+      ['English Teacher', 'english@merithome.com', '["English"]']
     ];
     
     const teacherIds = {};
@@ -133,7 +133,7 @@ async function seed() {
         [
           adminId,
           `Student ${i}`,
-          `student${i}@ariseacademy.com`,
+          `student${i}@merithome.com`,
           defaultPassword,
           isBatchA ? 'Class 9' : 'Class 10',
           isBatchA ? 'Batch A' : 'Batch B',

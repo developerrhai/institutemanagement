@@ -196,9 +196,9 @@ exports.sendOtp = async (req, res) => {
 
     // Send the email with the OTP code using module-level transporter
     await transporter.sendMail({
-      from: `"Arise Academy Support" <${process.env.EMAIL_USER}>`,
+      from: `"Merit Home Support" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Your Password Reset OTP - Arise Academy",
+      subject: "Your Password Reset OTP - Merit Home",
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 500px; border: 1px solid #eee; border-radius: 8px;">
           <h2 style="color: #4f46e5; text-align: center;">Reset Your Password</h2>

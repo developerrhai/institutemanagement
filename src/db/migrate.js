@@ -140,7 +140,6 @@ CREATE TABLE IF NOT EXISTS invoices (
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
 -- ─────────────────────────────────────────────────────────
 -- 7b. branches & batches
 -- ─────────────────────────────────────────────────────────
@@ -240,9 +239,9 @@ CREATE TABLE IF NOT EXISTS notes (
 
 
 -- ─────────────────────────────────────────────────────────
--- 14. inquiry_student
+-- 14. inquiry_extra
 -- ─────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS inquiry_student (
+CREATE TABLE IF NOT EXISTS inquiry_extra (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   phone VARCHAR(20) NOT NULL,
