@@ -47,9 +47,9 @@ exports.create = async (req, res) => {
     const { name, email, phone, father_name, father_phone, board, standard, course, location, institute, fee, paid_fee } = req.body;
     if (!name) return res.status(400).json({ success: false, message: "Name is required" });
 
-    if (email || phone) {
+    if ((email && email.trim() !== "") || (phone && phone.trim() !== "")) {
       const [existing] = await db.query(
-        "SELECT id FROM students WHERE email = ? OR phone = ?", 
+        "SELECT id FROM students WHERE (email = ? AND email != '') OR (phone = ? AND phone != '')", 
         [email || 'N/A', phone || 'N/A']
       );
       if (existing.length > 0) {

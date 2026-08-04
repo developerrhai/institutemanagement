@@ -73,3 +73,49 @@ exports.getBranches = async (req, res) => {
     });
   }
 };
+
+/* ── PUT /api/branches/:id ──────────────────────────────── */
+// Update an existing branch
+exports.updateBranch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { branch_name } = req.body;
+
+    if (!branch_name || branch_name.trim() === "") {
+      return res.status(400).json({ success: false, message: "Branch name is required" });
+    }
+
+    const [result] = await db.query(
+      "UPDATE branches SET branch_name = ? WHERE branch_id = ?",
+      [branch_name, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Branch not found" });
+    }
+
+    return res.status(200).json({ success: true, message: "Branch updated successfully" });
+  } catch (err) {
+    console.error("Error updating branch:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/* ── DELETE /api/branches/:id ───────────────────────────── */
+// Delete a branch
+exports.deleteBranch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [result] = await db.query("DELETE FROM branches WHERE branch_id = ?", [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Branch not found" });
+    }
+
+    return res.status(200).json({ success: true, message: "Branch deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting branch:", err);
+    return res.status(500).json({ success: false, message: "Server error (might be referenced elsewhere)" });
+  }
+};

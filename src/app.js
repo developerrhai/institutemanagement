@@ -22,6 +22,7 @@ app.use("/api/profile",      require("./routes/profile"));
 app.use("/api/students",     require("./routes/students"));
 app.use("/api/teachers",     require("./routes/teachers"));
 app.use("/api/inquiries",    require("./routes/inquiries"));
+app.use("/api/inquiry-extra", require("./routes/inquiryExtra"));
 app.use("/api/appointments", require("./routes/appointments"));
 app.use("/api/invoices",     require("./routes/invoices"));
 app.use("/api/finance",      require("./routes/finance"));
@@ -29,6 +30,9 @@ app.use("/api/dashboard",    require("./routes/dashboard"));
 app.use("/api/teacher-updates/public", require("./routes/teacherUpdatePublic"));
 app.use("/api/admissions/public",  require("./routes/admissionPublic"));
 app.use("/api/inquiries/public",  require("./routes/inquiryPublic"));
+app.use("/api/branches", require("./routes/branchRoute"));
+app.use("/api/batches", require("./routes/batchRoute"));
+app.use("/api/timetable", require("./routes/timetable"));
 
 /* ── Phase 1 Routes ─────────────────────────────────────── */
 app.use("/api/auth/student", require("./routes/studentAuthRoutes"));
