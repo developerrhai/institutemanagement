@@ -232,7 +232,7 @@ exports.copyMonth = async (req, res) => {
     }
     skipped = totalSourceValid - copied;
 
-    res.json({ success: true, message: \`Copied \${copied} entries. Skipped \${skipped} overflow entries.\` });
+    res.json({ success: true, message: `Copied ${copied} entries. Skipped ${skipped} overflow entries.` });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: err.message });
