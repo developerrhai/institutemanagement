@@ -67,6 +67,7 @@ app.use("/api/chat-groups", require("./routes/chatGroups"));
 app.use("/api/chat-messages", require("./routes/chatMessages"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/timetable", require("./routes/timetable"));
+app.use("/api/inventory", require("./routes/inventory"));
 
 /* ── Health check ───────────────────────────────────────── */
 app.get("/api/health", (_req, res) => {
