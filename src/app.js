@@ -33,6 +33,7 @@ app.use("/api/inquiries/public",  require("./routes/inquiryPublic"));
 app.use("/api/branches", require("./routes/branchRoute"));
 app.use("/api/batches", require("./routes/batchRoute"));
 app.use("/api/timetable", require("./routes/timetable"));
+app.use("/api/inventory", require("./routes/inventory"));
 
 /* ── Phase 1 Routes ─────────────────────────────────────── */
 app.use("/api/auth/student", require("./routes/studentAuthRoutes"));
