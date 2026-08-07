@@ -43,8 +43,8 @@ exports.getBatchesByBranch = async (req, res) => {
     let query = "SELECT * FROM batches";
     let params = [];
 
-    // If branch_id is provided, filter the results
-    if (branch_id) {
+    // If branch_id is provided and not 'all', filter the results
+    if (branch_id && branch_id !== 'all') {
       query += " WHERE branch_id = ?";
       params.push(branch_id);
     }
