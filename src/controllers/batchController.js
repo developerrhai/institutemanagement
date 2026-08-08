@@ -24,10 +24,20 @@ exports.createBatch = async (req, res) => {
       [branch_id, batch_name, start_time, end_time, batch_start_date, batch_end_date]
     );
 
+    const batchId = result.insertId;
+
+    // Automatically link batch to the teacher if created by a teacher
+    if (req.user && req.user.role === 'TEACHER') {
+      await db.query(
+        `INSERT INTO teacher_batch_mappings (teacher_id, batch_id) VALUES (?, ?)`,
+        [req.user.id, batchId]
+      );
+    }
+
     return res.status(201).json({
       success: true,
       message: "Batch created and linked to branch successfully",
-      batchId: result.insertId
+      batchId: batchId
     });
   } catch (err) {
     console.error("Create Batch Error:", err);
@@ -43,8 +53,8 @@ exports.getBatchesByBranch = async (req, res) => {
     let query = "SELECT * FROM batches";
     let params = [];
 
-    // If branch_id is provided and not 'all', filter the results
-    if (branch_id && branch_id !== 'all') {
+    // If branch_id is provided, filter the results
+    if (branch_id) {
       query += " WHERE branch_id = ?";
       params.push(branch_id);
     }

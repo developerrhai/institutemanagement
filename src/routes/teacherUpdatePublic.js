@@ -44,6 +44,7 @@
 		[adminId, branch]
 		)
 
+		/*
 		if (students.length > 0) {
 		const rows = students.map(s => [
 		adminId, s.id, s.name, batch, subject, chapter,
@@ -58,6 +59,7 @@
 		[rows]
 		)
 		}
+		*/
 
 		return res.status(201).json({
 		success: true,
@@ -110,16 +112,6 @@
 		sql += " ORDER BY class_date DESC, class_time DESC LIMIT 20"
 		const [rows] = await db.query(sql, params)
 		res.json({ success: true, data: rows })
-		} catch (err) {
-		res.status(500).json({ success: false, message: "Server error" })
-		}
-		})
-
-		router.get("/meta", async (req, res) => {
-		try {
-		const [branches] = await db.query("SELECT branch_name FROM branches ORDER BY branch_name ASC")
-		const [batches] = await db.query("SELECT batch_name FROM batches ORDER BY batch_name ASC")
-		res.json({ success: true, branches, batches })
 		} catch (err) {
 		res.status(500).json({ success: false, message: "Server error" })
 		}

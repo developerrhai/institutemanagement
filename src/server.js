@@ -11,7 +11,7 @@ const app = express();
 
 /* ── Middleware ─────────────────────────────────────────── */
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "https://merit-home.vercel.app",
+  origin: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -65,9 +65,6 @@ app.use("/api/homework", require("./routes/homework"));
 app.use("/api/teaching-logs", require("./routes/teachingLogs"));
 app.use("/api/chat-groups", require("./routes/chatGroups"));
 app.use("/api/chat-messages", require("./routes/chatMessages"));
-app.use("/api/notifications", require("./routes/notifications"));
-app.use("/api/timetable", require("./routes/timetable"));
-app.use("/api/inventory", require("./routes/inventory"));
 
 /* ── Health check ───────────────────────────────────────── */
 app.get("/api/health", (_req, res) => {
@@ -118,8 +115,12 @@ const PORT = process.env.PORT || 5001;
     const server = http.createServer(app);
 
     // Initialize Socket.io
-    const socketConfig = require("./config/socket");
-    socketConfig.init(server);
+    // const socketConfig = require("./config/socket");
+    // socketConfig.init(server);
+
+    // Start Smart Office background watcher
+    const { startWatcher } = require("./services/smartOfficeWatcher");
+    startWatcher();
 
     server.listen(PORT, () => {
       console.log(`\n🚀 Backend running → http://localhost:${PORT}`);

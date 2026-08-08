@@ -7,8 +7,7 @@ async function checkTeacherBatchAccess(teacherId, batchName) {
     [teacherId]
   );
   if (rows.length === 0) {
-    // If no mappings are configured for this teacher, default to allowing access
-    return { hasMappings: true, allowed: true };
+    return { hasMappings: false, allowed: false };
   }
 
   const [match] = await db.query(

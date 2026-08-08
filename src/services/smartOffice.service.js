@@ -9,9 +9,9 @@ const getSmartOfficeConfig = () => {
   const isConfigured = !!(baseUrl && apiKey && serialNumber);
 
   return {
-    baseUrl: baseUrl || "http://13.232.199.167",
-    apiKey: apiKey || "385619062612",
-    serialNumber: serialNumber || "AMDB25121401560",
+    baseUrl: baseUrl || "http://65.2.70.49",
+    apiKey: apiKey || "371114072602",
+    serialNumber: serialNumber || "", // Kept empty if not strictly needed
     isConfigured
   };
 };
@@ -30,8 +30,10 @@ async function fetchBiometricLogs(fromDate, toDate) {
     APIKey: config.apiKey,
     FromDate: fromDate,
     ToDate: toDate,
-    SerialNumber: config.serialNumber,
   });
+  if (config.serialNumber) {
+    params.append("SerialNumber", config.serialNumber);
+  }
 
   const url = `${config.baseUrl}/api/v2/WebAPI/GetDeviceLogs?${params}`;
   console.log(`[SmartOffice] Fetching device logs from: ${url}`);
@@ -215,8 +217,27 @@ async function syncBiometricAttendance(date) {
           return timeA - timeB;
         });
 
-      const sessionPunchIn = sessionLogs.length > 0 ? sessionLogs[0] : null;
-      const sessionPunchOut = sessionLogs.length > 1 ? sessionLogs[sessionLogs.length - 1] : null;
+      let sessionPunchIn = null;
+      let sessionPunchOut = null;
+
+      if (sessionLogs.length === 1) {
+        // Determine if this single punch is IN or OUT based on proximity to start/end
+        const log = sessionLogs[0];
+        const logTimePart = (log.LogDate || log.DateTime).split(" ")[1];
+        const pMin = timeToMinutes(logTimePart);
+        
+        const dToStart = Math.abs(pMin - sSessionMin);
+        const dToEnd = Math.abs(pMin - eSessionMin);
+        
+        if (dToStart <= dToEnd) {
+          sessionPunchIn = log;
+        } else {
+          sessionPunchOut = log;
+        }
+      } else if (sessionLogs.length > 1) {
+        sessionPunchIn = sessionLogs[0];
+        sessionPunchOut = sessionLogs[sessionLogs.length - 1];
+      }
 
       for (const batch of session) {
         const batchId = batch.batch_id;
@@ -244,8 +265,14 @@ async function syncBiometricAttendance(date) {
           const pOutTime = (sessionPunchOut.LogDate || sessionPunchOut.DateTime).split(" ")[1];
           const pOutMin = timeToMinutes(pOutTime);
 
-          if (pOutMin > sMin) {
+          if (pOutMin >= sMin) {
             punchOut = formatTime(parseLogDate(sessionPunchOut.LogDate || sessionPunchOut.DateTime));
+            if (!referenceId) referenceId = sessionPunchOut.SerialNumber || config.serialNumber;
+            
+            // If they only punched out, at least mark them as Present
+            if (status === "Absent") {
+              status = "Present";
+            }
           }
         }
 
@@ -256,8 +283,11 @@ async function syncBiometricAttendance(date) {
           [user.id, date, role, batchId, batchId]
         );
 
-        // If manual override exists, preserve it; otherwise upsert biometric record
-        if (existing.length === 0 || existing[0].source === "Smart Office") {
+        // If manual override exists, preserve it UNLESS we have a real biometric punch
+        const hasManualOverride = existing.length > 0 && existing[0].source === "Manual";
+        const hasBiometricPunch = punchIn !== null || punchOut !== null;
+
+        if (!hasManualOverride || (hasManualOverride && hasBiometricPunch)) {
           await db.query(
             `INSERT INTO attendance (user_id, role, date, punch_in_time, punch_out_time, status, source, smart_office_reference_id, batch_id)
              VALUES (?, ?, ?, ?, ?, ?, 'Smart Office', ?, ?)
@@ -278,8 +308,8 @@ async function syncBiometricAttendance(date) {
           date,
           punchIn,
           punchOut,
-          status: existing.length > 0 && existing[0].source === "Manual" ? existing[0].status : status,
-          source: existing.length > 0 && existing[0].source === "Manual" ? "Manual" : "Smart Office",
+          status: hasManualOverride && !hasBiometricPunch ? existing[0].status : status,
+          source: hasManualOverride && !hasBiometricPunch ? "Manual" : "Smart Office",
           batchName: batch.name,
           batchId
         });
