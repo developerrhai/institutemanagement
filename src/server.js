@@ -11,7 +11,13 @@ const app = express();
 
 /* ── Middleware ─────────────────────────────────────────── */
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "https://merit-home.vercel.app",
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (origin.endsWith('.vercel.app') || origin.startsWith('http://localhost:')) {
+      return callback(null, true);
+    }
+    return callback(null, process.env.FRONTEND_URL || "https://merit-home.vercel.app");
+  },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
