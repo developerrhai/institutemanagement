@@ -77,9 +77,12 @@ exports.update = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
+    // Optional: cascade delete teacher_batches if any exist to prevent foreign key errors
+    await db.query("DELETE FROM teacher_batches WHERE teacher_id = ?", [req.params.id]).catch(() => {});
+    
     const [result] = await db.query(
-      "DELETE FROM teachers WHERE id = ? AND (admin_id = ? OR admin_id IS NULL)",
-      [req.params.id, req.admin.id]
+      "DELETE FROM teachers WHERE id = ?",
+      [req.params.id]
     );
     if (!result.affectedRows) return res.status(404).json({ success: false, message: "Teacher not found" });
     res.json({ success: true, message: "Teacher deleted" });

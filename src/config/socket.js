@@ -8,7 +8,7 @@ module.exports = {
   init: (server) => {
     io = new Server(server, {
       cors: {
-        origin: process.env.FRONTEND_URL || ["http://localhost:3000", "https://arise-academy.vercel.app"],
+        origin: process.env.FRONTEND_URL || ["http://localhost:3000", "https://merit-home.vercel.app"],
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         credentials: true,
       },

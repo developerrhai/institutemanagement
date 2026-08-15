@@ -152,10 +152,10 @@ router.post("/leave", protect, authorize(["ADMIN", "TEACHER"]), async (req, res)
 
 // ── PUT /api/attendance/record (Manual Edit) ──────────────────────────────────
 router.put("/record", protect, authorize(["ADMIN", "TEACHER"]), async (req, res) => {
-  const { studentCode, biocode, studentId, date, status, punchIn, punchOut, batchId, role = 'STUDENT' } = req.body;
+  const { studentCode, date, status, punchIn, punchOut, batchId, role = 'STUDENT' } = req.body;
 
-  if ((!studentCode && !studentId) || !date) {
-    return res.status(400).json({ success: false, error: "studentId (or studentCode) and date are required" });
+  if (!studentCode || !date) {
+    return res.status(400).json({ success: false, error: "studentCode and date are required" });
   }
 
   const validStatuses = ["Present", "Absent", "Late", "On Leave", "Half-Day"];
@@ -167,29 +167,13 @@ router.put("/record", protect, authorize(["ADMIN", "TEACHER"]), async (req, res)
     const targetRole = role.toUpperCase();
     const table = targetRole === 'STUDENT' ? 'students' : 'teachers';
 
-    let userId;
-
-    if (studentId) {
-      // Find user by studentId
-      const [users] = await db.query(`SELECT id, biometric_code FROM ${table} WHERE id = ?`, [studentId]);
-      if (users.length === 0) {
-        return res.status(404).json({ success: false, error: `User with ID "${studentId}" not found` });
-      }
-      userId = users[0].id;
-      
-      // Update biometric code if it was changed
-      if (biocode !== undefined && biocode !== users[0].biometric_code) {
-        // Only update if it's not empty, or if we explicitly want to clear it (handle accordingly)
-        await db.query(`UPDATE ${table} SET biometric_code = ? WHERE id = ?`, [biocode || null, userId]);
-      }
-    } else {
-      // Fallback: Get user id from biometric code
-      const [users] = await db.query(`SELECT id FROM ${table} WHERE biometric_code = ?`, [studentCode]);
-      if (users.length === 0) {
-        return res.status(404).json({ success: false, error: `User with biometric code "${studentCode}" not found` });
-      }
-      userId = users[0].id;
+    // Get user id from biometric code
+    const [users] = await db.query(`SELECT id FROM ${table} WHERE biometric_code = ?`, [studentCode]);
+    if (users.length === 0) {
+      return res.status(404).json({ success: false, error: `User with biometric code "${studentCode}" not found` });
     }
+
+    const userId = users[0].id;
 
     // Upsert the record into attendance table
     await db.query(

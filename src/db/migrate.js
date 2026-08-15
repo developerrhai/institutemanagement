@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS students (
   phone        VARCHAR(20)  DEFAULT '',
   father_name  VARCHAR(100) DEFAULT '',
   father_phone VARCHAR(20)  DEFAULT '',
-  board        VARCHAR(50) DEFAULT '',
-  standard     VARCHAR(50)  DEFAULT '',
+  board        ENUM('CBSE','ICSE','State','') DEFAULT '',
+  standard     VARCHAR(10)  DEFAULT '',
   course       VARCHAR(100) DEFAULT '',
   location     VARCHAR(100) DEFAULT '',
   institute    VARCHAR(200) DEFAULT '',
@@ -91,8 +91,8 @@ CREATE TABLE IF NOT EXISTS inquiries (
   father_phone VARCHAR(20)  DEFAULT '',
   course       VARCHAR(100) DEFAULT '',
   location     VARCHAR(100) DEFAULT '',
-  board        VARCHAR(50)  DEFAULT '',
-  standard     VARCHAR(50)  DEFAULT '',
+  board        VARCHAR(20)  DEFAULT '',
+  standard     VARCHAR(10)  DEFAULT '',
   status       ENUM('New','Contacted','Follow Up','Admission Done','Not Interested') NOT NULL DEFAULT 'New',
   video        VARCHAR(500) DEFAULT '',
   inquiry_date DATE         NOT NULL DEFAULT (CURRENT_DATE),
@@ -108,8 +108,8 @@ CREATE TABLE IF NOT EXISTS appointments (
   id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   admin_id         INT UNSIGNED NOT NULL,
   name             VARCHAR(100) NOT NULL,
-  standard         VARCHAR(50)  DEFAULT '',
-  board            VARCHAR(50)  DEFAULT '',
+  standard         VARCHAR(10)  DEFAULT '',
+  board            VARCHAR(20)  DEFAULT '',
   course           VARCHAR(100) DEFAULT '',
   appointment_date DATE         NOT NULL,
   appointment_time TIME         NOT NULL,
@@ -139,7 +139,6 @@ CREATE TABLE IF NOT EXISTS invoices (
   FOREIGN KEY (admin_id)   REFERENCES admins(id)   ON DELETE CASCADE,
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 -- ─────────────────────────────────────────────────────────
 -- 7b. branches & batches
@@ -240,9 +239,9 @@ CREATE TABLE IF NOT EXISTS notes (
 
 
 -- ─────────────────────────────────────────────────────────
--- 14. inquiry_student
+-- 14. inquiry_extra
 -- ─────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS inquiry_student (
+CREATE TABLE IF NOT EXISTS inquiry_extra (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   phone VARCHAR(20) NOT NULL,
@@ -250,8 +249,8 @@ CREATE TABLE IF NOT EXISTS inquiry_student (
   father_phone VARCHAR(20) DEFAULT '',
   course VARCHAR(100) DEFAULT '',
   location VARCHAR(100) DEFAULT '',
-  board VARCHAR(50) DEFAULT '',
-  standard VARCHAR(50) DEFAULT '',
+  board VARCHAR(20) DEFAULT '',
+  standard VARCHAR(10) DEFAULT '',
   status VARCHAR(50) NOT NULL DEFAULT 'New',
   video VARCHAR(500) DEFAULT '',
   dob DATE DEFAULT NULL,

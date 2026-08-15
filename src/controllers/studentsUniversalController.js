@@ -3,7 +3,7 @@ const db = require("../config/db");
 exports.getAll = async (req, res) => {
   try {
     const { standard, board, location, search } = req.query;
-    let sql = "SELECT * FROM students WHERE 1=1";
+    let sql = "SELECT * FROM students WHERE 1=1 AND deleted_at IS NULL";
     const params = [];
 
     if (standard) { sql += " AND standard = ?"; params.push(standard); }

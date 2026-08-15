@@ -8,7 +8,7 @@ exports.getAll = async (_req, res) => {
          status, video, dob, email, address, college_name, college_timing, last_exam_marks,
          father_occupation, mother_occupation, future_plans, reference, sibling_name, sex,
          taking_coaching, hostel_required, admin_id, inquiry_date
-       FROM inquiry_student
+       FROM inquiry_extra
        ORDER BY inquiry_date DESC, id DESC`
     );
 
@@ -60,7 +60,7 @@ exports.createInquiryExtra = async (req, res) => {
 
     // ✅ Insert Query
     const [result] = await db.query(
-      `INSERT INTO inquiry_student (
+      `INSERT INTO inquiry_extra (
         name, phone, father_name, father_phone, dob, sex, email, address,
         standard, course, board, location, last_exam_marks, college_name, college_timing,
         future_plans, father_occupation, mother_occupation, sibling_name,
@@ -121,7 +121,7 @@ exports.remove = async (req, res) => {
 
   try {
     const [result] = await db.query(
-      "DELETE FROM inquiry_student WHERE id = ?",
+      "DELETE FROM inquiry_extra WHERE id = ?",
       [id]
     );
 
@@ -155,7 +155,7 @@ exports.update = async (req, res) => {
     const setClause = keys.map(k => `${k} = ?`).join(", ");
     const values = [...Object.values(fields), id];
     const [result] = await db.query(
-      `UPDATE inquiry_student SET ${setClause} WHERE id = ?`, values
+      `UPDATE inquiry_extra SET ${setClause} WHERE id = ?`, values
     );
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: "Inquiry not found" });

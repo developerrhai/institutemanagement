@@ -7,7 +7,8 @@ async function checkTeacherBatchAccess(teacherId, batchName) {
     [teacherId]
   );
   if (rows.length === 0) {
-    return { hasMappings: false, allowed: false };
+    // If no mappings are configured for this teacher, default to allowing access
+    return { hasMappings: true, allowed: true };
   }
 
   // Exact or strict matching instead of simple LOWER(TRIM) for better performance/security
