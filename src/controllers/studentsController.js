@@ -110,8 +110,8 @@ exports.update = async (req, res) => {
 exports.remove = async (req, res) => {
   try {
     const [result] = await db.query(
-      "UPDATE students SET deleted_at = NOW() WHERE id = ?",
-      [req.params.id]
+      "UPDATE students SET deleted_at = NOW() WHERE id = ? AND admin_id = ?",
+      [req.params.id, req.admin.id]
     );
     if (!result.affectedRows) return res.status(404).json({ success: false, message: "Student not found" });
     res.json({ success: true, message: "Student deleted" });
