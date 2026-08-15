@@ -1,5 +1,16 @@
 const db = require("../config/db");
 
+/**
+ * Normalise any date value (ISO string, Date object, or YYYY-MM-DD string)
+ * into the MySQL-safe 'YYYY-MM-DD' format.
+ */
+function toMySQLDate(dateValue) {
+  if (!dateValue) return null;
+  const d = new Date(dateValue);
+  if (isNaN(d.getTime())) return dateValue; // passthrough if unparseable
+  return d.toISOString().split('T')[0];     // '2026-08-08'
+}
+
 // Helper to check if teacher is mapped to a batch
 async function checkTeacherBatchAccess(teacherId, batchName) {
   const [rows] = await db.query(
@@ -61,7 +72,7 @@ exports.createHomework = async (req, res) => {
           subject, 
           calculatedBatch.trim(), 
           teacherId, 
-          dueDate, 
+          toMySQLDate(dueDate), 
           attachmentUrl || null, 
           branch || null, 
           board || null, 
@@ -107,7 +118,7 @@ exports.createHomework = async (req, res) => {
       const [result] = await db.query(
         `INSERT INTO homework (title, description, subject, batch, teacher_id, due_date, attachment_url)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [title, description, subject, batch.trim(), teacherId, dueDate, attachmentUrl || null]
+        [title, description, subject, batch.trim(), teacherId, toMySQLDate(dueDate), attachmentUrl || null]
       );
       results.push({ batch, id: result.insertId });
     }
@@ -140,7 +151,7 @@ exports.editHomework = async (req, res) => {
 
     const updatedTitle = title || homework.title;
     const updatedDesc = description || homework.description;
-    const updatedDueDate = dueDate || homework.due_date;
+    const updatedDueDate = toMySQLDate(dueDate || homework.due_date);
     const updatedAttachment = attachmentUrl !== undefined ? attachmentUrl : homework.attachment_url;
 
     await db.query(

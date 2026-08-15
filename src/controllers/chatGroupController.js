@@ -146,7 +146,7 @@ exports.addMembers = async (req, res) => {
 
     if (membersToInsert.length > 0) {
         await db.query(
-            `INSERT INTO chat_group_members (group_id, user_id, user_role, removed_at) 
+            `INSERT INTO chat_group_members (group_id, user_id, user_role) 
              VALUES ? 
              ON DUPLICATE KEY UPDATE removed_at = NULL`,
             [membersToInsert]

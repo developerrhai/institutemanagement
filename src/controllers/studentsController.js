@@ -143,7 +143,15 @@ exports.getStudentPassword = async (req, res) => {
     }
     
     if (!plainTextPassword) {
-      return res.status(500).json({ success: false, message: "Decryption failed. The key might have changed." });
+      // Decryption failed (key mismatch) — fall back to phone-based default
+      const phone = rows[0].phone || "";
+      const phoneLast4 = phone.length >= 4 ? phone.slice(-4) : "0000";
+      const fallback = `Student@${phoneLast4}`;
+      return res.json({ 
+        success: true, 
+        plainTextPassword: fallback,
+        warning: "Could not decrypt stored password (encryption key may have changed). Showing default password." 
+      });
     }
 
     res.json({ success: true, plainTextPassword });
